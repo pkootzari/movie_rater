@@ -12,15 +12,12 @@ from django.contrib.auth.models import User
 class UserViewset(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
-    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAdminUser]
 
 
 class MoviesViewset(viewsets.ModelViewSet):
     queryset = models.Movie.objects.all()
     serializer_class = serializers.MovieSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
 
     @action(detail=True, methods=['POST'])
     def rate(self, request, pk=None):
@@ -48,5 +45,9 @@ class MoviesViewset(viewsets.ModelViewSet):
 class RatingsViewset(viewsets.ModelViewSet):
     queryset = models.Rating.objects.all()
     serializer_class = serializers.RatingSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        return Response({'message': 'You can\'t rate like this go to /api/movies/{movie_id}/rate/'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        return Response({'message': 'You can\'t rate like this go to /api/movies/{movie_id}/rate/'}, status=status.HTTP_400_BAD_REQUEST)
