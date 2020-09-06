@@ -13,6 +13,16 @@ class Movie(models.Model) :
             models.Index(fields=['title', 'description'])
         ]
 
+    def num_of_ratings(self):
+        ratings = self.ratings.all()
+        return len(ratings)
+
+    def avg_ratings(self):
+        ratings = self.ratings.all()
+        if len(ratings) == 0:
+            return 0
+        return sum([rating.stars for rating in ratings]) / len(ratings)
+
     def __str__(self):
         return self.title
 
