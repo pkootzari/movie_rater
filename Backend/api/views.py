@@ -2,6 +2,8 @@ from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, IsAuthenticatedOrReadOnly
 from . import models
 from . import serializers
 from django.contrib.auth.models import User
@@ -10,11 +12,15 @@ from django.contrib.auth.models import User
 class UserViewset(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAdminUser]
 
 
 class MoviesViewset(viewsets.ModelViewSet):
     queryset = models.Movie.objects.all()
     serializer_class = serializers.MovieSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     @action(detail=True, methods=['POST'])
     def rate(self, request, pk=None):
@@ -42,3 +48,5 @@ class MoviesViewset(viewsets.ModelViewSet):
 class RatingsViewset(viewsets.ModelViewSet):
     queryset = models.Rating.objects.all()
     serializer_class = serializers.RatingSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
