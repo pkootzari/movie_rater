@@ -1,5 +1,7 @@
 from django.shortcuts import render
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from . import models
 from . import serializers
 from django.contrib.auth.models import User
@@ -13,6 +15,28 @@ class UserViewset(viewsets.ModelViewSet):
 class MoviesViewset(viewsets.ModelViewSet):
     queryset = models.Movie.objects.all()
     serializer_class = serializers.MovieSerializer
+
+    @action(detail=True, methods=['POST'])
+    def rate(self, request, pk=None):
+        if 'stars' in request.data and 1 <= int(request.data['stars']) <= 5:
+            stars = request.data['stars']
+            movie = models.Movie.objects.get(pk=pk)
+            user = request.user
+            if request.user.is_anonymous:
+                user = User.objects.get(pk=1)
+            try:
+                rating = models.Rating.objects.get(user=user, movie=movie)
+                rating.stars = stars
+                rating.save()
+                serializer = serializers.RatingSerializer(rating, many=False)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except Exception:
+                rating = models.Rating.objects.create(user=user, movie=movie, stars=stars)
+                serializer = serializers.RatingSerializer(rating, many=False)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        else:
+            return Response({'stars': 'You need to enter this field correctly!'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RatingsViewset(viewsets.ModelViewSet):

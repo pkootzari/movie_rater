@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class Movie(models.Model) :
@@ -26,7 +27,7 @@ class Rating(models.Model):
     ]
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='ratings')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ratings')
-    stars = models.IntegerField(choices=RATING_CHOICES)
+    stars = models.IntegerField(choices=RATING_CHOICES, validators=[MinValueValidator(1), MaxValueValidator(5)])
 
     class Meta:
         unique_together = ['movie', 'user']
@@ -36,5 +37,5 @@ class Rating(models.Model):
             models.Index(fields=['user']),
         ]
 
-    # def __str__(self):
-    #     return '{} gave {} starts for movie {} '.format(self.user.username, self.stars, self.movie.title)
+    def __str__(self):
+        return '{} gave {} starts for movie {} '.format(self.user.username, self.stars, self.movie.title)
